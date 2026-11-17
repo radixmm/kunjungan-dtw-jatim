@@ -29,7 +29,7 @@ export default async function Paspor() {
               const d = DTW.get(r.dtw_kode);
               return (
                 <figure key={r.dtw_kode}>
-                  <Stamp nama={d?.nama || r.dtw_kode} kab={d?.kab || ""} tanggal={fmt(r.first)} kode={r.dtw_kode} size={130} />
+                  <Stamp nama={d?.nama || r.dtw_kode} kab={d?.kab || ""} tanggal={fmt(r.first)} kode={r.dtw_kode} kategori={d?.kategori} size={130} />
                   <figcaption><b>{d?.nama}</b><br /><span className="muted">{r.n}× {en ? "visit" : "kunjungan"}</span></figcaption>
                 </figure>
               );

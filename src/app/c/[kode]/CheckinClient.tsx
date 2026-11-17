@@ -331,7 +331,7 @@ export default function CheckinClient(p: Props) {
       {step === "done" && res && (
         <>
           <section className="card done" aria-live="polite">
-            <div ref={stampRef} className="stampbox"><Stamp nama={p.dtw.nama} kab={p.dtw.kab} tanggal={fmtDate(visitDate, lang)} kode={p.dtw.id} /></div>
+            <div ref={stampRef} className="stampbox"><Stamp nama={p.dtw.nama} kab={p.dtw.kab} kategori={p.dtw.kategori} tanggal={fmtDate(visitDate, lang)} kode={p.dtw.id} /></div>
             <h2>{res.status === "antre" ? t.queuedTitle : res.status === "sudah_tercatat" ? t.dupTitle : t.doneTitle}</h2>
             {res.status === "antre" ? <p className="muted small" style={{ margin: 0 }}>{t.queuedBody}</p>
               : res.stamps ? <p className="muted" style={{ margin: 0 }}>{t.stampsCount(res.stamps)}</p> : null}
