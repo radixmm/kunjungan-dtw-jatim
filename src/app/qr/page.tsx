@@ -1,3 +1,4 @@
+import { META_DASHBOARD } from "@/lib/appMeta";
 import QRCode from "qrcode";
 import { getAdmin } from "@/lib/session";
 import { PILOT, DTW } from "@/lib/ref";
@@ -6,7 +7,7 @@ import { baseUrl } from "@/lib/baseurl";
 import { redirect } from "next/navigation";
 import PrintButton from "./PrintButton";
 
-export const metadata = { title: "QR DTW Pilot", robots: { index: false } };
+export const metadata = { ...META_DASHBOARD,  title: "QR DTW Pilot", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 export default async function QrSheet() {

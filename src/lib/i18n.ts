@@ -7,9 +7,9 @@ export function pickLang(acceptLanguage?: string | null): Lang {
 
 export const T = {
   id: {
-    brand: "Paspor Wisata Jatim",
+    brand: "Jatim Pass",
     welcome: "Selamat datang di",
-    intro: "Catat kunjungan Anda dalam satu menit dan dapatkan stempel digital Paspor Wisata Jatim.",
+    intro: "Catat kunjungan Anda dalam satu menit dan dapatkan stempel digital Jatim Pass.",
     step: (n: number) => `Langkah ${n} dari 3`,
     login: "Masuk dengan Google",
     loginWhy: "Akun Google dipakai agar satu orang dihitung sekali per hari. Email Anda tidak ditampilkan di mana pun.",
@@ -52,10 +52,10 @@ export const T = {
     queuedTitle: "Tersimpan di perangkat",
     queuedBody: "Sinyal sedang tidak tersedia. Data akan dikirim otomatis saat ponsel kembali online (buka halaman ini lagi bila perlu).",
     stamp: "Stempel",
-    stampsCount: (n: number) => `Anda sudah mengumpulkan ${n} stempel Paspor Wisata Jatim`,
+    stampsCount: (n: number) => `Anda sudah mengumpulkan ${n} stempel Jatim Pass`,
     groupCodeShow: "Kode rombongan Anda — bagikan ke peserta agar tidak dihitung dua kali:",
     share: "Bagikan",
-    shareText: (n: string) => `Saya sudah ke ${n}! #PasporWisataJatim`,
+    shareText: (n: string) => `Saya sudah ke ${n}! #JatimPass`,
     shareCard: "Saya sudah ke",
     download: "Unduh kartu",
     info: "Info DTW",
@@ -72,7 +72,7 @@ export const T = {
     errQr: "QR tidak valid atau sudah kedaluwarsa. Pindai QR resmi yang terpasang di lokasi.",
     errGeneric: "Gagal menyimpan. Coba lagi.",
     required: "Lengkapi isian yang ditandai.",
-    notIllegalLottery: "Paspor Wisata Jatim bukan undian: setiap pengunjung yang check-in mendapat stempel yang sama.",
+    notIllegalLottery: "Jatim Pass bukan undian: setiap pengunjung yang check-in mendapat stempel yang sama.",
     privacy: "Privasi",
   },
   en: {
@@ -124,7 +124,7 @@ export const T = {
     stampsCount: (n: number) => `You have collected ${n} Jatim Pass stamp${n === 1 ? "" : "s"}`,
     groupCodeShow: "Your group code — share it with participants so they aren't counted twice:",
     share: "Share",
-    shareText: (n: string) => `I've been to ${n}! #PasporWisataJatim`,
+    shareText: (n: string) => `I've been to ${n}! #JatimPass`,
     shareCard: "I've been to",
     download: "Download card",
     info: "Attraction info",

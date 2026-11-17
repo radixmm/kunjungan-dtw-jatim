@@ -1,0 +1,24 @@
+{
+  "display": "standalone",
+  "background_color": "#f1f5f4",
+  "lang": "id",
+  "name": "Jatim Pass – Petugas DTW",
+  "short_name": "Petugas DTW",
+  "id": "/petugas",
+  "start_url": "/petugas",
+  "scope": "/",
+  "theme_color": "#2a78d6",
+  "icons": [
+    {
+      "src": "/icon-petugas.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/apple-petugas.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

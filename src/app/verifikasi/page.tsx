@@ -1,10 +1,11 @@
+import { META_DASHBOARD } from "@/lib/appMeta";
 import { getStaff } from "@/lib/staff";
 import { config } from "@/lib/config";
 import { StaffNav } from "@/components/StaffNav";
 import StaffLogin from "@/components/StaffLogin";
 import VerifikasiClient from "./VerifikasiClient";
 
-export const metadata = { title: "Verifikasi Rekap DTW · Jatim Pass", robots: { index: false } };
+export const metadata = { ...META_DASHBOARD,  title: "Verifikasi Rekap DTW · Jatim Pass", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 export default async function Page() {

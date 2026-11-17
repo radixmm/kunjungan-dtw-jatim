@@ -3,7 +3,7 @@
 Prototipe pilot untuk Bidang Destinasi Pariwisata, Dinas Kebudayaan dan Pariwisata Provinsi Jawa Timur.
 
 - **Check-in pengunjung** (`/c/<kode DTW>`): pindai QR → login Google satu ketukan → isian grup, kategori, dan asal → persetujuan data (UU 27/2022) → tersimpan. Bahasa ID/EN mengikuti bahasa ponsel.
-- **Insentif**: stempel digital *Paspor Wisata Jatim*, kartu bagikan "Saya sudah ke …", info DTW (fasilitas, peta, UMKM), dan halaman `/paspor`.
+- **Insentif**: stempel digital *Jatim Pass*, kartu bagikan "Saya sudah ke …", info DTW (fasilitas, peta, UMKM), dan halaman `/paspor`.
 - **Dashboard** (`/dashboard`): real-time per DTW, kab/kota, Bakorwil, DPP, KSPP; wisnus/wisman; kategori rombongan; pola perjalanan; cakupan scan vs laporan manual; ekspor rekap bulanan format sheet DATABASE.
 - **QR** (`/qr`): lembar QR statis siap cetak dan layar QR dinamis untuk tablet loket.
 

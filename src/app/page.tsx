@@ -1,7 +1,10 @@
+import { META_DASHBOARD } from "@/lib/appMeta";
 import Link from "next/link";
 import { PILOT, DTW } from "@/lib/ref";
 import { isDemo } from "@/lib/config";
 import { qrSigStatic } from "@/lib/crypto";
+
+export const metadata = { ...META_DASHBOARD, title: "Kunjungan DTW Jatim" };
 
 export default function Home() {
   const demo = isDemo();
@@ -10,7 +13,7 @@ export default function Home() {
       <header className="hero" style={{ paddingTop: 28 }}>
         <span className="kicker">Disbudpar Provinsi Jawa Timur · Bidang Destinasi Pariwisata</span>
         <h1>Pencatatan Kunjungan DTW berbasis QR</h1>
-        <span className="loc">Prototipe pilot {PILOT.length} DTW · check-in pengunjung, Paspor Wisata Jatim, dan dashboard monitoring</span>
+        <span className="loc">Prototipe pilot {PILOT.length} DTW · check-in pengunjung, Jatim Pass, dan dashboard monitoring</span>
       </header>
       {demo && <div className="demo-flag">MODE DEMO: login Google belum dikonfigurasi. Tautan check-in di bawah hanya ditampilkan di mode demo untuk uji coba; di produksi pengunjung harus memindai QR di lokasi.</div>}
       <section className="card">

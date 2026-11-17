@@ -1,0 +1,24 @@
+{
+  "display": "standalone",
+  "background_color": "#f1f5f4",
+  "lang": "id",
+  "name": "Jatim Pass – Dashboard DTW",
+  "short_name": "Dashboard DTW",
+  "id": "/dashboard",
+  "start_url": "/dashboard",
+  "scope": "/",
+  "theme_color": "#13252b",
+  "icons": [
+    {
+      "src": "/icon-dashboard.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/apple-dashboard.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

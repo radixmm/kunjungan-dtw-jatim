@@ -1,8 +1,10 @@
+import { META_DASHBOARD } from "@/lib/appMeta";
 import { notFound, redirect } from "next/navigation";
 import { getAdmin } from "@/lib/session";
 import { DTW } from "@/lib/ref";
 import RotatingQr from "./RotatingQr";
 
+export const metadata = { ...META_DASHBOARD, title: "Kunjungan DTW Jatim" };
 export const dynamic = "force-dynamic";
 
 // Layar QR dinamis untuk tablet di loket. Prototipe: memakai sesi admin; produksi: akun petugas per DTW.
