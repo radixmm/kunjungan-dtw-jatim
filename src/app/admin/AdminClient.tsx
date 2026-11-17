@@ -7,7 +7,7 @@ const PERAN: Record<string, string> = { admin: "Admin provinsi", verifikator: "V
 const fmt = (s: string) => new Date(s + "T00:00:00").toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
 
 export default function AdminClient({ isAdmin, dtwPetugas, dtwOnline, kabs }: { isAdmin: boolean; dtwPetugas: { kode: string; nama: string; kab: string }[]; dtwOnline: { kode: string; nama: string }[]; kabs: string[] }) {
-  const [tab, setTab] = useState<"akun" | "libur" | "unggah">("akun");
+  const [tab, setTab] = useState<"akun" | "libur" | "unggah" | "hapus">("akun");
   return (
     <main className="db">
       <div className="db-top"><div><h1>{isAdmin ? "Admin" : "Akun petugas DTW"}</h1><p>{isAdmin ? "Kelola akun, periode libur, dan data sistem tiket online." : "Daftarkan email Google petugas DTW di wilayah Anda."}</p></div></div>
@@ -16,11 +16,13 @@ export default function AdminClient({ isAdmin, dtwPetugas, dtwOnline, kabs }: { 
           <button aria-pressed={tab === "akun"} onClick={() => setTab("akun")}>Akun</button>
           <button aria-pressed={tab === "libur"} onClick={() => setTab("libur")}>Periode libur</button>
           <button aria-pressed={tab === "unggah"} onClick={() => setTab("unggah")}>Unggah data online</button>
+          <button aria-pressed={tab === "hapus"} onClick={() => setTab("hapus")}>Hapus data uji</button>
         </div>
       )}
       {tab === "akun" && <Akun isAdmin={isAdmin} dtwPetugas={dtwPetugas} kabs={kabs} />}
       {tab === "libur" && isAdmin && <Libur />}
       {tab === "unggah" && isAdmin && <Unggah dtwOnline={dtwOnline} />}
+      {tab === "hapus" && isAdmin && <HapusUji />}
     </main>
   );
 }
@@ -122,6 +124,39 @@ function Unggah({ dtwOnline }: { dtwOnline: { kode: string; nama: string }[] }) 
       <button className="btn primary" onClick={kirim} disabled={!csv.trim()} style={{ alignSelf: "flex-start" }}>Unggah</button>
       {res && <div className={"alert" + (res.errors?.length ? " warn" : "")}>{res.n} baris tersimpan.{res.errors?.length ? ` ${res.errors.length} baris ditolak: ${res.errors.join("; ")}` : ""}</div>}
       <p className="sub" style={{ margin: 0 }}>DTW berjalur online: {dtwOnline.map((d) => `${d.nama} (${d.kode})`).join(", ") || "—"}.</p>
+    </section>
+  );
+}
+
+function HapusUji() {
+  const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Jakarta" }).format(new Date());
+  const [sampai, setSampai] = useState(today);
+  const [opt, setOpt] = useState({ checkin: true, rekap: true });
+  const [n, setN] = useState<{ checkin: number; rekap: number; hitung: number } | null>(null);
+  const [konf, setKonf] = useState("");
+  const [msg, setMsg] = useState("");
+  const load = useCallback(async () => { const r = await fetch(`/api/admin/reset?sampai=${sampai}`, { cache: "no-store" }); if (r.ok) setN(await r.json()); }, [sampai]);
+  useEffect(() => { load(); }, [load]);
+  const go = async () => {
+    const r = await fetch("/api/admin/reset", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ sampai, konfirmasi: konf, ...opt }) });
+    const j = await r.json().catch(() => ({}));
+    setMsg(r.ok ? `Terhapus: ${j.dihapus.checkin} check-in, ${j.dihapus.rekap} rekap harian, ${j.dihapus.hitung} ketukan hitung.` : "Gagal: " + (j.error || r.status));
+    setKonf(""); load();
+  };
+  return (
+    <section className="panel w12" style={{ gridColumn: "auto" }}>
+      <h2>Hapus data uji coba</h2>
+      <p className="sub">Untuk membersihkan data selama masa uji sebelum pilot resmi dimulai. Data yang terhapus <b>tidak bisa dikembalikan</b>. Akun pengguna, periode libur, dan jejak aktivitas tidak ikut terhapus.</p>
+      <div className="formrow">
+        <label>Hapus data sampai tanggal (termasuk)<input type="date" value={sampai} max={today} onChange={(e) => setSampai(e.target.value)} /></label>
+      </div>
+      <label className="check"><input type="checkbox" checked={opt.checkin} onChange={(e) => setOpt({ ...opt, checkin: e.target.checked })} />Check-in wisatawan (scan QR){n ? `: ${n.checkin} data` : ""}. Stempel di Paspor ikut hilang.</label>
+      <label className="check"><input type="checkbox" checked={opt.rekap} onChange={(e) => setOpt({ ...opt, rekap: e.target.checked })} />Rekap harian DTW dan ketukan tombol hitung petugas{n ? `: ${n.rekap} rekap, ${n.hitung} ketukan` : ""}</label>
+      <div className="formrow">
+        <label>Ketik <code>HAPUS DATA UJI</code> untuk konfirmasi<input type="text" value={konf} onChange={(e) => setKonf(e.target.value)} autoComplete="off" /></label>
+        <button className="btn" style={{ borderColor: "var(--bad)", color: "var(--bad)" }} disabled={konf !== "HAPUS DATA UJI" || (!opt.checkin && !opt.rekap)} onClick={go}>Hapus permanen</button>
+      </div>
+      {msg && <div className="alert">{msg}</div>}
     </section>
   );
 }
