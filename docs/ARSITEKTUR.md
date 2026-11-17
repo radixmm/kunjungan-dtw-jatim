@@ -243,3 +243,33 @@ Semua DTW pilot tidak terdampak. Sebelum perluasan, kode-kode ini perlu diperbai
 | UU No. 22 Tahun 1954 tentang Undian | Insentif dirancang bukan undian | https://peraturan.go.id/id/uu-no-22-tahun-1954 |
 
 > Catatan: tautan peraturan.go.id di atas mengikuti pola URL resmi situs tersebut, tetapi belum bisa dibuka dari lingkungan pengembangan ini (akses jaringan dibatasi). Mohon dicek sekali sebelum dokumen diedarkan. Alternatif: JDIH BPK https://peraturan.bpk.go.id.
+
+---
+
+## 14. Pencatatan dari sisi DTW (tambahan 17 November 2026)
+
+Scan wisatawan di pintu masuk bisa memicu antrean di DTW ramai, dan sebagian DTW sudah punya sistem tiket online. Karena itu tugasnya dipisah:
+
+- **Menghitung** (angka resmi) dicatat oleh **DTW** lewat salah satu dari tiga jalur.
+- **Mengenali** (asal, rombongan, pola perjalanan) dilakukan oleh **wisatawan lewat scan QR**. QR cukup dipasang di titik santai (spot foto, area makan, pintu keluar), tidak di gerbang.
+
+| Jalur | DTW pilot | Cara kerja |
+|---|---|---|
+| **Rekap petugas** | Telaga Sarangan, Sunan Ampel, Pantai Lombang, Jawa Timur Park I–III | Petugas memakai `/petugas`: tombol hitung +1 wisnus/wisman/rombongan (bisa offline), lalu **rekap harian** dikirim |
+| **Scan wisatawan** | Kawah Ijen, Goa Gong, Museum Angkut*, Candi Penataran* | Jumlah orang dari check-in QR menjadi angka resmi; rekap harian dibuat otomatis |
+| **Tiket online** | Kawasan Gunung Bromo (TNBTS) | Admin mengunggah CSV data Balai Besar TNBTS (`tanggal,kode_dtw,wisnus,wisman`); langsung terverifikasi |
+
+\* Belum ditentukan Bidang; sementara memakai jalur scan.
+
+**Peran dan akses** (login Google, didaftarkan lewat `/admin`):
+- *Petugas DTW*: hanya DTW yang ditugaskan.
+- *Verifikator kab/kota*: dashboard dan verifikasi khusus wilayahnya, serta mendaftarkan petugas DTW di wilayahnya.
+- *Admin provinsi*: semua wilayah, akun verifikator, periode libur, unggah data online, ekspor rekap.
+
+**Verifikasi**: kab/kota memverifikasi **mingguan** (batas: Selasa setelah pekan berakhir). Pada **periode libur** yang ditetapkan admin, verifikasi wajib **harian** (batas H+1). Rekap terverifikasi terkunci; koreksi hanya lewat admin (buka kunci) dan tercatat di `log_aktivitas`. Penolakan wajib disertai alasan.
+
+**Rekap bulanan** (ekspor format sheet DATABASE) kini memakai angka resmi dari `rekap_harian`, dengan pilihan "hanya terverifikasi". Kolom KET berisi jalur dan jumlah hari terisi/terverifikasi.
+
+**Catatan TNBTS**: TNBTS dikelola Balai Besar TNBTS (Kementerian Kehutanan), sehingga perlu surat permintaan data atau PKS. Pintu masuk TNBTS tersebar di Kab. Probolinggo, Pasuruan, Malang, dan Lumajang; sebagian belum punya kode DTW di sheet profil.
+
+**Data pribadi petugas**: email akun petugas/verifikator disimpan untuk akuntabilitas (siapa mengisi dan memverifikasi). Data ini milik pegawai/pengelola, bukan wisatawan, dan hanya terlihat oleh admin serta verifikator terkait.

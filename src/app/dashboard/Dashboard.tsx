@@ -15,6 +15,7 @@ type Stats = {
   feed: { jam: string; dtw: string; pax: number; kategori: string; asal: string | null; wisman: boolean; geo: string }[];
   flows: { pasangan: { dari: string; ke: string; n: number; jam: number }[]; multiDtw: number; pengunjung: number; minCell: number };
   cakupan: { bulan: string; rows: { kode: string; nama: string; scan: number; manual: number | null; persen: number | null; sumber: string | null }[] };
+  resmi: { rows: { kode: string; nama: string; kab: string; jalur: "petugas" | "scan" | "online"; wisnus: number; wisman: number; hari: number; terverifikasi: number; ditolak: number; nHari: number }[]; total: { wisnus: number; wisman: number; hari: number; ok: number } };
   generatedAt: string;
 };
 
@@ -27,7 +28,9 @@ const addDays = (d: string, k: number) => { const x = new Date(d + "T00:00:00Z")
 
 type Range = "hari" | "7" | "30" | "bulan" | "kustom";
 
-export default function Dashboard({ demo, pilot, today, email }: { demo: boolean; pilot: { kode: string; nama: string }[]; today: string; email: string }) {
+const JALUR: Record<string, string> = { petugas: "Rekap petugas", scan: "Scan wisatawan", online: "Tiket online" };
+
+export default function Dashboard({ demo, pilot, today, email, wilayah }: { demo: boolean; pilot: { kode: string; nama: string }[]; today: string; email: string; wilayah: string | null }) {
   const [range, setRange] = useState<Range>("hari");
   const [from, setFrom] = useState(today);
   const [to, setTo] = useState(today);
@@ -73,12 +76,11 @@ export default function Dashboard({ demo, pilot, today, email }: { demo: boolean
     <main className="db">
       <div className="db-top">
         <div>
-          <h1>Kunjungan Wisatawan DTW — Pilot Scan QR</h1>
-          <p>Bidang Destinasi Pariwisata · Disbudpar Provinsi Jawa Timur · {pilot.length} DTW pilot</p>
+          <h1>Kunjungan Wisatawan DTW</h1>
+          <p>{wilayah ? `Wilayah ${wilayah}` : "Bidang Destinasi Pariwisata · Disbudpar Provinsi Jawa Timur"} · {pilot.length} DTW pilot</p>
         </div>
         <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
           <span className="live"><i />{data ? `Diperbarui ${new Date(data.generatedAt).toLocaleTimeString("id-ID", { timeZone: "Asia/Jakarta" })} WIB` : "Memuat…"}</span>
-          <a className="btn" href="/qr" style={{ minHeight: 36 }}>QR DTW</a>
           {!demo && <button className="btn" style={{ minHeight: 36 }} onClick={logout} title={email}>Keluar</button>}
         </div>
       </div>
@@ -101,7 +103,7 @@ export default function Dashboard({ demo, pilot, today, email }: { demo: boolean
           <input type="date" value={to} min={from} max={today} onChange={(e) => setTo(e.target.value)} aria-label="Sampai tanggal" />
         </>)}
         <select value={dtw} onChange={(e) => setDtw(e.target.value)} aria-label="DTW">
-          <option value="">Semua DTW pilot</option>
+          <option value="">{wilayah ? "Semua DTW di wilayah" : "Semua DTW pilot"}</option>
           {pilot.map((p) => <option key={p.kode} value={p.kode}>{p.nama}</option>)}
         </select>
         <div className="seg" role="group" aria-label="Mutu data">
@@ -109,12 +111,12 @@ export default function Dashboard({ demo, pilot, today, email }: { demo: boolean
           <button aria-pressed={mutu === "terverifikasi"} onClick={() => setMutu("terverifikasi")} title="Lokasi cocok dan tanpa bendera perjalanan mustahil">Terverifikasi lokasi</button>
         </div>
         <span className="sp" />
-        <ExportButtons month={to.slice(0, 7)} mutu={mutu} />
+        {!wilayah && <ExportButtons month={to.slice(0, 7)} mutu={mutu} />}
       </div>
       {err && <div className="alert bad">{err}</div>}
 
       <section className="kpis" aria-label="Ringkasan">
-        <Kpi label="Wisatawan (orang)" value={t?.pax} note={`${n(t?.checkin || 0)} check-in`} />
+        <Kpi label="Wisatawan via scan (orang)" value={t?.pax} note={`${n(t?.checkin || 0)} check-in`} />
         <Kpi label="Wisnus" value={t?.wisnus} note={t?.pax ? `${Math.round((t.wisnus / t.pax) * 100)}%` : ""} dot="var(--wisnus)" />
         <Kpi label="Wisman" value={t?.wisman} note={t?.pax ? `${Math.round((t.wisman / t.pax) * 100)}%` : ""} dot="var(--wisman)" />
         <Kpi label="Akun unik" value={t?.visitors} note="1 akun = 1× per DTW per hari" />
@@ -135,7 +137,28 @@ export default function Dashboard({ demo, pilot, today, email }: { demo: boolean
         </section>
 
         <section className="panel w12">
-          <h2>Per DTW</h2>
+          <h2>Angka resmi dari rekap DTW</h2>
+          <p className="sub">Jumlah kunjungan dari jalur pencatatan masing-masing DTW: rekap harian petugas, scan wisatawan, atau sistem tiket online. Angka inilah yang masuk rekap bulanan setelah diverifikasi kab/kota.</p>
+          <div className="kpis">
+            <Kpi label="Wisatawan (rekap resmi)" value={(data?.resmi.total.wisnus || 0) + (data?.resmi.total.wisman || 0)} note={`${n(data?.resmi.total.wisnus || 0)} wisnus · ${n(data?.resmi.total.wisman || 0)} wisman`} />
+            <Kpi label="Hari-DTW terverifikasi" value={data?.resmi.total.hari ? Math.round((data.resmi.total.ok / data.resmi.total.hari) * 100) : 0} suffix="%" note={`${n(data?.resmi.total.ok || 0)} dari ${n(data?.resmi.total.hari || 0)} rekap harian`} />
+          </div>
+          <div className="tbl-wrap">
+            <table className="tbl">
+              <thead><tr><th>DTW</th><th>Kab/Kota</th><th>Jalur</th><th className="r">Wisnus</th><th className="r">Wisman</th><th className="r">Total</th><th className="r">Hari terisi</th><th className="r">Terverifikasi</th></tr></thead>
+              <tbody>{data?.resmi.rows.map((r) => (
+                <tr key={r.kode}><td><b>{r.nama}</b></td><td>{r.kab}</td><td className="small">{JALUR[r.jalur]}</td>
+                  <td className="r">{n(r.wisnus)}</td><td className="r">{n(r.wisman)}</td><td className="r"><b>{n(r.wisnus + r.wisman)}</b></td>
+                  <td className="r">{r.hari}/{r.nHari}</td>
+                  <td className="r">{r.hari ? <Pct v={Math.round((r.terverifikasi / r.hari) * 100)} /> : "—"}{r.ditolak ? <span className="small muted"> · {r.ditolak} ditolak</span> : null}</td></tr>
+              ))}</tbody>
+            </table>
+          </div>
+          <p className="sub" style={{ margin: 0 }}>Rekap jalur scan dibuat otomatis untuk hari yang sudah lewat. Rekap hari ini muncul setelah petugas mengirim.</p>
+        </section>
+
+        <section className="panel w12">
+          <h2>Per DTW (scan wisatawan)</h2>
           <div className="tbl-wrap">
             <table className="tbl">
               <thead><tr><th>Kode</th><th>DTW</th><th>Kab/Kota</th><th>Kategori</th><th className="r">Wisnus</th><th className="r">Wisman</th><th className="r">Total</th><th className="r">Check-in</th><th className="r">Lokasi cocok</th></tr></thead>
@@ -286,14 +309,17 @@ function Columns({ rows, unit }: { rows: { k: string; wisnus: number; wisman: nu
 }
 function niceMax(v: number) { const p = 10 ** Math.floor(Math.log10(v)); const m = v / p; return (m <= 1 ? 1 : m <= 2 ? 2 : m <= 5 ? 5 : 10) * p; }
 
-function ExportButtons({ month, mutu }: { month: string; mutu: string }) {
+function ExportButtons({ month }: { month: string; mutu?: string }) {
   const [m, setM] = useState(month);
+  const [hanyaOk, setHanyaOk] = useState(false);
   useEffect(() => setM(month), [month]);
+  const q = `bulan=${m}&mutu=${hanyaOk ? "terverifikasi" : "semua"}`;
   return (
-    <span style={{ display: "inline-flex", gap: 6, alignItems: "center" }}>
+    <span style={{ display: "inline-flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
       <input type="month" value={m} onChange={(e) => setM(e.target.value)} aria-label="Bulan rekap" />
-      <a className="btn" style={{ minHeight: 38 }} href={`/api/export?bulan=${m}&format=xlsx&mutu=${mutu}`}>Ekspor rekap (.xlsx)</a>
-      <a className="btn" style={{ minHeight: 38 }} href={`/api/export?bulan=${m}&format=csv&mutu=${mutu}`}>.csv</a>
+      <label className="small" style={{ display: "inline-flex", gap: 4, alignItems: "center" }}><input type="checkbox" checked={hanyaOk} onChange={(e) => setHanyaOk(e.target.checked)} />Hanya terverifikasi</label>
+      <a className="btn" style={{ minHeight: 38 }} href={`/api/export?${q}&format=xlsx`}>Ekspor rekap (.xlsx)</a>
+      <a className="btn" style={{ minHeight: 38 }} href={`/api/export?${q}&format=csv`}>.csv</a>
     </span>
   );
 }

@@ -1,9 +1,10 @@
 import { q } from "./db";
 import { config } from "./config";
-import { DTW, PILOT, wilayahDtw, dppLabel, ksppLabel, namaProv, namaKabAsal } from "./ref";
+import { DTW, PILOT, wilayahDtw, dppLabel, ksppLabel, namaProv, namaKabAsal, jalurOf } from "./ref";
+import { syncScanRekap } from "./rekap";
 import { wibDate, addDays } from "./time";
 
-export type Filter = { from: string; to: string; mutu: "semua" | "terverifikasi"; dtw?: string };
+export type Filter = { from: string; to: string; mutu: "semua" | "terverifikasi"; dtw?: string; kodes?: string[] /* batas wilayah verifikator */ };
 
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 export function parseFilter(sp: URLSearchParams): Filter {
@@ -21,6 +22,7 @@ function where(f: Filter, alias = "") {
   let w = `${a}visit_date BETWEEN $1::date AND $2::date`;
   if (f.mutu === "terverifikasi") w += ` AND ${a}geo_status = 'ok' AND position('perjalanan_mustahil' in ${a}flags) = 0`;
   if (f.dtw) { params.push(f.dtw); w += ` AND ${a}dtw_kode = $${params.length}`; }
+  if (f.kodes) { params.push(f.kodes.join(",")); w += ` AND ${a}dtw_kode = ANY(string_to_array($${params.length}, ','))`; }
   return { w, params };
 }
 
@@ -73,7 +75,8 @@ export async function getStats(f: Filter) {
 
   // Semua DTW pilot ditampilkan walau belum ada check-in.
   const dtwRows = new Map(byDtw.map((r) => [r.dtw_kode, r]));
-  const dtwList = [...new Set([...PILOT.map((p) => p.kode), ...dtwRows.keys()])].filter((k) => !f.dtw || k === f.dtw).map((k) => {
+  const inScope = (k: string) => (!f.dtw || k === f.dtw) && (!f.kodes || f.kodes.includes(k));
+  const dtwList = [...new Set([...PILOT.map((p) => p.kode), ...dtwRows.keys()])].filter(inScope).map((k) => {
     const d = DTW.get(k)!, r = dtwRows.get(k);
     return { kode: k, nama: d?.nama || k, kab: d?.kab || "", kategori: d?.kategori || "", pax: r?.pax || 0, wisnus: r?.wisnus || 0, wisman: r?.wisman || 0, checkin: r?.checkin || 0, geoOk: r?.geo_ok || 0 };
   }).sort((a, b) => b.pax - a.pax);
@@ -96,6 +99,7 @@ export async function getStats(f: Filter) {
       asal: r.asal_tipe === "wisman" ? r.asal_negara : namaKabAsal(r.asal_kab) || namaProv(r.asal_prov), wisman: r.asal_tipe === "wisman", geo: r.geo_status })),
     flows: await getFlows(f),
     cakupan: await getCoverage(f),
+    resmi: await getResmi(f),
     generatedAt: new Date().toISOString(),
   };
 }
@@ -110,13 +114,14 @@ function fillSeries(rows: (Agg & { k: string })[], f: Filter, single: boolean) {
 
 /** Pola perjalanan: pasangan DTW berurutan oleh pengunjung yang sama dalam 3 hari. Hanya agregat. */
 async function getFlows(f: Filter) {
-  const params: unknown[] = [addDays(f.from, -3), f.to, f.from, config.minCell];
+  const params: unknown[] = [addDays(f.from, -3), f.to, f.from, config.minCell, (f.kodes ?? []).join(",")];
+  const scope = (n: number) => (f.kodes ? `AND dtw_kode = ANY(string_to_array($${n}, ','))` : `AND $${n}::text IS NOT NULL`);
   const rows = await q<{ dari: string; ke: string; n: number; jam: number }>(`
     WITH s AS (
       SELECT visitor_hash, dtw_kode, visit_at, visit_date,
              lag(dtw_kode) OVER (PARTITION BY visitor_hash ORDER BY visit_at) AS prev_kode,
              lag(visit_at) OVER (PARTITION BY visitor_hash ORDER BY visit_at) AS prev_at
-      FROM checkin WHERE visit_date BETWEEN $1::date AND $2::date AND visitor_hash NOT LIKE 'anon:%')
+      FROM checkin WHERE visit_date BETWEEN $1::date AND $2::date AND visitor_hash NOT LIKE 'anon:%' ${scope(5)})
     SELECT prev_kode AS dari, dtw_kode AS ke, count(*)::int AS n,
            round(avg(extract(epoch FROM visit_at - prev_at) / 3600)::numeric, 1)::float8 AS jam
     FROM s WHERE prev_kode IS NOT NULL AND prev_kode <> dtw_kode AND visit_at - prev_at <= interval '3 days' AND visit_date >= $3::date
@@ -124,7 +129,7 @@ async function getFlows(f: Filter) {
   const multi = await q<{ n: number; total: number }>(`
     SELECT count(*) FILTER (WHERE k > 1)::int AS n, count(*)::int AS total FROM (
       SELECT visitor_hash, count(DISTINCT dtw_kode) AS k FROM checkin
-      WHERE visit_date BETWEEN $1::date AND $2::date AND visitor_hash NOT LIKE 'anon:%' GROUP BY 1) x`, [f.from, f.to]);
+      WHERE visit_date BETWEEN $1::date AND $2::date AND visitor_hash NOT LIKE 'anon:%' ${scope(3)} GROUP BY 1) x`, [f.from, f.to, (f.kodes ?? []).join(",")]);
   return {
     pasangan: rows.map((r) => ({ dari: DTW.get(r.dari)?.nama || r.dari, ke: DTW.get(r.ke)?.nama || r.ke, n: r.n, jam: r.jam })),
     multiDtw: multi[0]?.n || 0, pengunjung: multi[0]?.total || 0, minCell: config.minCell,
@@ -139,7 +144,7 @@ async function getCoverage(f: Filter) {
     FROM checkin WHERE to_char(visit_date, 'YYYY-MM') = $1 GROUP BY 1`, [bulan]);
   const man = await q<{ dtw_kode: string; wisnus: number; wisman: number; sumber: string | null }>(`SELECT dtw_kode, wisnus, wisman, sumber FROM laporan_manual WHERE bulan = $1`, [bulan]);
   const sm = new Map(scan.map((r) => [r.dtw_kode, r])), mm = new Map(man.map((r) => [r.dtw_kode, r]));
-  const kodes = [...new Set([...PILOT.map((p) => p.kode), ...sm.keys()])].filter((k) => !f.dtw || k === f.dtw);
+  const kodes = [...new Set([...PILOT.map((p) => p.kode), ...sm.keys()])].filter((k) => (!f.dtw || k === f.dtw) && (!f.kodes || f.kodes.includes(k)));
   return {
     bulan,
     rows: kodes.map((k) => {
@@ -148,4 +153,24 @@ async function getCoverage(f: Filter) {
       return { kode: k, nama: DTW.get(k)?.nama || k, scan: sc, manual: mn, persen: mn ? Math.round((sc / mn) * 1000) / 10 : null, sumber: m?.sumber || null };
     }).sort((a, b) => (b.persen ?? -1) - (a.persen ?? -1)),
   };
+}
+
+/** Angka resmi dari rekap harian DTW (petugas / scan / online) beserta status verifikasinya. */
+async function getResmi(f: Filter) {
+  const kodes = PILOT.map((p) => p.kode).filter((k) => (!f.dtw || k === f.dtw) && (!f.kodes || f.kodes.includes(k)));
+  await syncScanRekap(f.from, f.to, kodes);
+  const rows = await q<{ dtw_kode: string; wisnus: number; wisman: number; hari: number; ok: number; tolak: number }>(`
+    SELECT dtw_kode, sum(wisnus)::int AS wisnus, sum(wisman)::int AS wisman, count(*)::int AS hari,
+           sum(CASE WHEN status='terverifikasi' THEN 1 ELSE 0 END)::int AS ok, sum(CASE WHEN status='ditolak' THEN 1 ELSE 0 END)::int AS tolak
+    FROM rekap_harian WHERE tanggal BETWEEN $1::date AND $2::date AND dtw_kode = ANY(string_to_array($3, ',')) GROUP BY 1`,
+    [f.from, f.to, kodes.join(",")]);
+  const m = new Map(rows.map((r) => [r.dtw_kode, r]));
+  const nHari = Math.round((Date.parse(f.to) - Date.parse(f.from)) / 86400e3) + 1;
+  const list = kodes.map((k) => {
+    const r = m.get(k);
+    return { kode: k, nama: DTW.get(k)?.nama || k, kab: DTW.get(k)?.kab || "", jalur: jalurOf(k), wisnus: r?.wisnus || 0, wisman: r?.wisman || 0,
+      hari: r?.hari || 0, terverifikasi: r?.ok || 0, ditolak: r?.tolak || 0, nHari };
+  }).sort((a, b) => b.wisnus + b.wisman - (a.wisnus + a.wisman));
+  const total = list.reduce((a, r) => ({ wisnus: a.wisnus + r.wisnus, wisman: a.wisman + r.wisman, hari: a.hari + r.hari, ok: a.ok + r.terverifikasi }), { wisnus: 0, wisman: 0, hari: 0, ok: 0 });
+  return { rows: list, total };
 }
