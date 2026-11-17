@@ -17,7 +17,7 @@ export default async function Paspor() {
   const fmt = (d: string) => new Date(d + "T00:00:00").toLocaleDateString(en ? "en-GB" : "id-ID", { day: "numeric", month: "short", year: "numeric" });
   return (
     <main className="ci">
-      <div className="ci-top"><span className="ci-brand">{en ? "East Java Travel Passport" : "Paspor Wisata Jatim"}</span></div>
+      <div className="ci-top"><span className="ci-brand">{en ? "Jatim Pass" : "Paspor Wisata Jatim"}</span></div>
       <header className="hero">
         <h1>{en ? "My passport" : "Paspor saya"}</h1>
         <span className="loc">{v ? `${v.m} · ${rows.length} ${en ? "stamp(s)" : "stempel"}` : en ? "No check-in yet on this device." : "Belum ada check-in dari perangkat ini."}</span>
