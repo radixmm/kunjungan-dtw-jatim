@@ -2,7 +2,7 @@
   "display": "standalone",
   "background_color": "#f1f5f4",
   "lang": "id",
-  "name": "Paspor Wisata Jatim",
+  "name": "Jatim Pass",
   "short_name": "Jatim Pass",
   "id": "/paspor",
   "start_url": "/paspor",

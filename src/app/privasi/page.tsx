@@ -1,4 +1,4 @@
-export const metadata = { title: "Pemberitahuan Privasi · Paspor Wisata Jatim" };
+export const metadata = { title: "Pemberitahuan Privasi · Jatim Pass" };
 
 export default function Privasi() {
   return (

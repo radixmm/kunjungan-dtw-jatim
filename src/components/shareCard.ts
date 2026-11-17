@@ -27,7 +27,7 @@ export async function makeShareCard(opts: { title: string; nama: string; kab: st
     g.drawImage(img, -215, -215, 430, 430); g.restore();
   }
   g.fillStyle = "#ffffff"; g.font = "600 36px 'Plus Jakarta Sans', sans-serif"; g.fillText(opts.tanggal, 80, H - 120);
-  g.fillStyle = "#cfe9eb"; g.font = "500 32px 'Plus Jakarta Sans', sans-serif"; g.fillText("#PasporWisataJatim", 80, H - 70);
+  g.fillStyle = "#cfe9eb"; g.font = "500 32px 'Plus Jakarta Sans', sans-serif"; g.fillText("#JatimPass", 80, H - 70);
   return new Promise<Blob>((res) => c.toBlob((b) => res(b!), "image/png"));
 }
 

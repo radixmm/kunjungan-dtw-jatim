@@ -7,7 +7,7 @@ import { pickLang } from "@/lib/i18n";
 import { Stamp } from "@/components/Stamp";
 import HapusData from "./HapusData";
 
-export const metadata = { ...META_WISATAWAN,  title: "Paspor Wisata Jatim", robots: { index: false } };
+export const metadata = { ...META_WISATAWAN,  title: "Jatim Pass", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 export default async function Paspor() {
@@ -18,7 +18,7 @@ export default async function Paspor() {
   const fmt = (d: string) => new Date(d + "T00:00:00").toLocaleDateString(en ? "en-GB" : "id-ID", { day: "numeric", month: "short", year: "numeric" });
   return (
     <main className="ci">
-      <div className="ci-top"><span className="ci-brand">{en ? "Jatim Pass" : "Paspor Wisata Jatim"}</span></div>
+      <div className="ci-top"><span className="ci-brand">Jatim Pass</span></div>
       <header className="hero">
         <h1>{en ? "My passport" : "Paspor saya"}</h1>
         <span className="loc">{v ? `${v.m} · ${rows.length} ${en ? "stamp(s)" : "stempel"}` : en ? "No check-in yet on this device." : "Belum ada check-in dari perangkat ini."}</span>

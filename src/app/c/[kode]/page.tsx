@@ -12,7 +12,7 @@ type P = { params: Promise<{ kode: string }>; searchParams: Promise<{ s?: string
 
 export async function generateMetadata({ params }: P): Promise<Metadata> {
   const d = DTW.get(decodeURIComponent((await params).kode));
-  return { title: d ? `Check-in ${d.nama} · Paspor Wisata Jatim` : "Paspor Wisata Jatim", robots: { index: false } };
+  return { title: d ? `Check-in ${d.nama} · Jatim Pass` : "Jatim Pass", robots: { index: false } };
 }
 
 export default async function Page({ params, searchParams }: P) {

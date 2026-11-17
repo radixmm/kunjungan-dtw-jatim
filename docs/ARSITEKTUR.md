@@ -47,7 +47,7 @@ Versi rancangan: 17 November 2026 (pilot 5–10 DTW)
                     data/pilot.json DTW pilot, radius lokasi, daftar UMKM
 ```
 
-Setelah tersimpan, pengunjung melihat **stempel Paspor Wisata Jatim**, tombol **bagikan kartu "Saya sudah ke …"**, info DTW (deskripsi, jam buka, tiket, fasilitas, peta, DPP/KSPP), dan daftar UMKM.
+Setelah tersimpan, pengunjung melihat **stempel Jatim Pass**, tombol **bagikan kartu "Saya sudah ke …"**, info DTW (deskripsi, jam buka, tiket, fasilitas, peta, DPP/KSPP), dan daftar UMKM.
 
 ---
 
