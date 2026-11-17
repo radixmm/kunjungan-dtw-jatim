@@ -1,10 +1,11 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { META_WISATAWAN } from "@/lib/appMeta";
 
 export const metadata: Metadata = {
   title: "Kunjungan DTW Jatim",
   description: "Pencatatan kunjungan wisatawan berbasis QR — Dinas Kebudayaan dan Pariwisata Provinsi Jawa Timur",
-  manifest: "/manifest.webmanifest",
+  ...META_WISATAWAN,
 };
 export const viewport: Viewport = { width: "device-width", initialScale: 1, viewportFit: "cover", themeColor: "#0d6b77" };
 

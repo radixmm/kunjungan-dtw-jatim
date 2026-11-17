@@ -1,3 +1,4 @@
+import { META_DASHBOARD } from "@/lib/appMeta";
 import { getStaff, scopeKodes } from "@/lib/staff";
 import { config, isDemo } from "@/lib/config";
 import { DTW } from "@/lib/ref";
@@ -6,7 +7,7 @@ import { StaffNav } from "@/components/StaffNav";
 import Dashboard from "./Dashboard";
 import AdminLogin from "./AdminLogin";
 
-export const metadata = { title: "Dashboard Kunjungan DTW · Disbudpar Jatim", robots: { index: false } };
+export const metadata = { ...META_DASHBOARD,  title: "Dashboard Kunjungan DTW · Disbudpar Jatim", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 export default async function Page() {

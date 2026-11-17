@@ -1,3 +1,4 @@
+import { META_DASHBOARD } from "@/lib/appMeta";
 import { getStaff } from "@/lib/staff";
 import { config } from "@/lib/config";
 import { DTW, KAB, PILOT } from "@/lib/ref";
@@ -5,7 +6,7 @@ import { StaffNav } from "@/components/StaffNav";
 import StaffLogin from "@/components/StaffLogin";
 import AdminClient from "./AdminClient";
 
-export const metadata = { title: "Admin · Jatim Pass", robots: { index: false } };
+export const metadata = { ...META_DASHBOARD,  title: "Admin · Jatim Pass", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 export default async function Page() {

@@ -1,7 +1,10 @@
+import { META_DASHBOARD } from "@/lib/appMeta";
 import Link from "next/link";
 import { PILOT, DTW } from "@/lib/ref";
 import { isDemo } from "@/lib/config";
 import { qrSigStatic } from "@/lib/crypto";
+
+export const metadata = { ...META_DASHBOARD, title: "Kunjungan DTW Jatim" };
 
 export default function Home() {
   const demo = isDemo();

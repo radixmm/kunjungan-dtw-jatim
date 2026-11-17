@@ -1,10 +1,24 @@
 {
-  "name": "Paspor Wisata Jatim",
-  "short_name": "Paspor Jatim",
-  "start_url": "/paspor",
   "display": "standalone",
   "background_color": "#f1f5f4",
-  "theme_color": "#0d6b77",
   "lang": "id",
-  "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+  "name": "Paspor Wisata Jatim",
+  "short_name": "Jatim Pass",
+  "id": "/paspor",
+  "start_url": "/paspor",
+  "scope": "/",
+  "theme_color": "#0d6b77",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/apple-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
 }

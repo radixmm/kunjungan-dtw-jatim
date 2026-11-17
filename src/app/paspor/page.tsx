@@ -1,3 +1,4 @@
+import { META_WISATAWAN } from "@/lib/appMeta";
 import { headers } from "next/headers";
 import { getVisitor } from "@/lib/session";
 import { q } from "@/lib/db";
@@ -6,7 +7,7 @@ import { pickLang } from "@/lib/i18n";
 import { Stamp } from "@/components/Stamp";
 import HapusData from "./HapusData";
 
-export const metadata = { title: "Paspor Wisata Jatim", robots: { index: false } };
+export const metadata = { ...META_WISATAWAN,  title: "Paspor Wisata Jatim", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 export default async function Paspor() {
