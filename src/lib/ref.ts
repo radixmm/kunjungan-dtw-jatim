@@ -10,7 +10,10 @@ export type Dtw = {
   v25?: number[]; v26?: number[];
 };
 export type Umkm = { nama: string; jenis?: string; lokasi?: string; wa?: string };
-export type Pilot = { kode: string; radius_m?: number; qr?: string; alasan?: string; umkm: Umkm[] };
+export type Jalur = "petugas" | "scan" | "online";
+export type Pilot = { kode: string; radius_m?: number; qr?: string; jalur: Jalur; alasan?: string; umkm: Umkm[] };
+export const JALUR_LABEL: Record<Jalur, string> = { petugas: "Rekap petugas", scan: "Scan wisatawan", online: "Sistem tiket online" };
+export const jalurOf = (kode: string): Jalur => (PILOT_MAP.get(kode)?.jalur ?? "scan");
 
 type KabInfo = { bakorwil: string | null; bakorwil_nama: string | null; dpp: number | null };
 

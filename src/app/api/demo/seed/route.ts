@@ -66,5 +66,40 @@ export async function POST() {
       ON CONFLICT (bulan, dtw_kode) DO UPDATE SET wisnus = EXCLUDED.wisnus, wisman = EXCLUDED.wisman, sumber = EXCLUDED.sumber`,
       [bulan, d.id, Math.round(v[0] / v[2]), Math.round(v[1] / v[2]), `rata-rata bulanan 2026 (${v[2]} bulan terlapor)`]);
   }
+  // Rekap harian simulasi untuk DTW jalur petugas & online, plus contoh periode libur.
+  await q(`DELETE FROM rekap_harian WHERE diisi_oleh LIKE 'demo%' OR sumber = 'scan'`);
+  await q(`DELETE FROM hitung_petugas WHERE petugas LIKE 'demo%'`);
+  await q(`DELETE FROM periode_libur WHERE dibuat_oleh = 'demo'`);
+  await q(`INSERT INTO periode_libur (nama, mulai, selesai, dibuat_oleh) VALUES ($1, $2, $3, 'demo'), ('Libur Natal & Tahun Baru (contoh)', $4, $5, 'demo')`,
+    ["Libur panjang akhir pekan (contoh)", addDays(today, -9), addDays(today, -7), today.slice(0, 4) + "-12-20", String(Number(today.slice(0, 4)) + 1) + "-01-04"]);
+  const all = PILOT.map((p) => DTW.get(p.kode)!).filter(Boolean);
+  for (const d of all) {
+    const p = PILOT.find((x) => x.kode === d.id)!;
+    if (p.jalur === "scan") continue;
+    const base = Math.max(300, Math.round(((d.v26?.[0] || d.v25?.[0] || 30000) + (d.v26?.[1] || d.v25?.[1] || 0)) / Math.max(1, d.v26?.[2] || 12) / 30));
+    const wmShare = Math.max(0.03, Math.min(0.4, (d.v25?.[1] || 0) / Math.max(1, (d.v25?.[0] || 0) + (d.v25?.[1] || 0))));
+    for (let i = 1; i <= 30; i++) {
+      const day = addDays(today, -i);
+      if (p.jalur === "petugas" && (i === 2 || i === 3) && d.id.endsWith("8")) continue; // contoh rekap belum diisi
+      const dow = new Date(day + "T00:00:00Z").getUTCDay();
+      const tot = Math.round(base * (dow === 0 || dow === 6 ? 1.8 : 0.8) * (0.8 + rnd() * 0.4));
+      const wm = Math.round(tot * wmShare);
+      const status = p.jalur === "online" ? "terverifikasi" : i > 8 ? "terverifikasi" : i === 5 && d.id.endsWith("7") ? "ditolak" : "diajukan";
+      await q(`INSERT INTO rekap_harian (dtw_kode, tanggal, wisnus, wisman, sumber, catatan, diisi_oleh, diisi_at, status, diverifikasi_oleh, diverifikasi_at, catatan_verifikasi)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, now(), $8, $9, CASE WHEN $9::text IS NULL THEN NULL ELSE now() END, $10) ON CONFLICT DO NOTHING`,
+        [d.id, day, tot - wm, wm, p.jalur, i === 7 ? "Hujan deras sore hari" : null, p.jalur === "online" ? "demo-unggah" : "demo-petugas@contoh.id", status,
+          status === "terverifikasi" ? (p.jalur === "online" ? "Balai Besar TNBTS (contoh)" : "demo-verifikator@contoh.id") : status === "ditolak" ? "demo-verifikator@contoh.id" : null,
+          status === "ditolak" ? "Angka wisman tidak wajar, mohon dicek ulang" : null]);
+    }
+    if (p.jalur === "petugas") {
+      for (let h = 0; h < 40; h++) {
+        const at = new Date(`${today}T${String(8 + Math.floor(h / 6)).padStart(2, "0")}:${String((h * 7) % 60).padStart(2, "0")}:00+07:00`);
+        if (at.getTime() > Date.now()) break;
+        const wm = rnd() < wmShare ? 1 : 0;
+        await q(`INSERT INTO hitung_petugas (client_id, dtw_kode, waktu, tanggal, wisnus, wisman, petugas) VALUES ($1, $2, $3, $4, $5, $6, 'demo-petugas') ON CONFLICT DO NOTHING`,
+          [`demo-${d.id}-${h}`, d.id, at.toISOString(), today, wm ? 0 : 1 + Math.floor(rnd() * 4), wm]);
+      }
+    }
+  }
   return NextResponse.json({ ok: true, checkin: rows.length });
 }

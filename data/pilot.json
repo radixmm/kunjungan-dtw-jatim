@@ -1,13 +1,93 @@
 {
-  "_catatan": "Usulan 8 DTW pilot: mencakup 5 DPP, kategori Alam/Budaya/Buatan, DTW dominan wisman dan wisnus. Ubah sesuai keputusan Bidang. radius_m = radius verifikasi lokasi (meter); kawasan luas diberi radius lebih besar. umkm diisi pengelola.",
+  "_catatan": "DTW pilot. jalur = cara angka resmi dicatat: 'petugas' (rekap harian petugas DTW, dibantu tombol hitung), 'scan' (check-in QR wisatawan menjadi angka resmi), 'online' (data sistem tiket pengelola, mis. TNBTS). radius_m = radius verifikasi lokasi scan (meter). umkm diisi pengelola.",
   "dtw": [
-    { "kode": "DT.13.0002", "radius_m": 8000, "qr": "statis+dinamis", "alasan": "DPP 2, wisman tinggi, kawasan luas", "umkm": [] },
-    { "kode": "DT.10.0028", "radius_m": 5000, "qr": "statis+dinamis", "alasan": "DPP 4, wisman tinggi", "umkm": [] },
-    { "kode": "DT.79.0022", "radius_m": 800,  "qr": "dinamis", "alasan": "DPP 2, DTW buatan berloket", "umkm": [] },
-    { "kode": "DT.05.0012", "radius_m": 1000, "qr": "statis", "alasan": "DPP 3, cagar budaya", "umkm": [] },
-    { "kode": "DT.01.0001", "radius_m": 1000, "qr": "statis", "alasan": "DPP 3, data fasilitas lengkap", "umkm": [] },
-    { "kode": "DT.20.0001", "radius_m": 2000, "qr": "statis", "alasan": "DPP 3, wisnus sangat tinggi", "umkm": [] },
-    { "kode": "DT.78.0020", "radius_m": 800,  "qr": "statis", "alasan": "DPP 1, wisata religi perkotaan", "umkm": [] },
-    { "kode": "DT.29.0014", "radius_m": 2000, "qr": "statis", "alasan": "DPP 5, Madura", "umkm": [] }
+    {
+      "kode": "DT.13.0002",
+      "radius_m": 8000,
+      "qr": "statis+dinamis",
+      "alasan": "DPP 2, wisman tinggi, kawasan luas; Data tiket online TNBTS (bromotenggersemeru.id)",
+      "umkm": [],
+      "jalur": "online"
+    },
+    {
+      "kode": "DT.10.0028",
+      "radius_m": 5000,
+      "qr": "statis+dinamis",
+      "alasan": "DPP 4, wisman tinggi",
+      "umkm": [],
+      "jalur": "scan"
+    },
+    {
+      "kode": "DT.79.0022",
+      "radius_m": 800,
+      "qr": "dinamis",
+      "alasan": "DPP 2, DTW buatan berloket",
+      "umkm": [],
+      "jalur": "scan"
+    },
+    {
+      "kode": "DT.05.0012",
+      "radius_m": 1000,
+      "qr": "statis",
+      "alasan": "DPP 3, cagar budaya",
+      "umkm": [],
+      "jalur": "scan"
+    },
+    {
+      "kode": "DT.01.0001",
+      "radius_m": 1000,
+      "qr": "statis",
+      "alasan": "DPP 3, data fasilitas lengkap",
+      "umkm": [],
+      "jalur": "scan"
+    },
+    {
+      "kode": "DT.20.0001",
+      "radius_m": 2000,
+      "qr": "statis",
+      "alasan": "DPP 3, wisnus sangat tinggi",
+      "umkm": [],
+      "jalur": "petugas"
+    },
+    {
+      "kode": "DT.78.0020",
+      "radius_m": 800,
+      "qr": "statis",
+      "alasan": "DPP 1, wisata religi perkotaan; Ramai, tanpa tiket: dihitung petugas",
+      "umkm": [],
+      "jalur": "petugas"
+    },
+    {
+      "kode": "DT.29.0014",
+      "radius_m": 2000,
+      "qr": "statis",
+      "alasan": "DPP 5, Madura",
+      "umkm": [],
+      "jalur": "petugas"
+    },
+    {
+      "kode": "DT.79.0017",
+      "radius_m": 600,
+      "qr": "statis",
+      "jalur": "petugas",
+      "alasan": "DPP 2, DTW buatan berloket; mode petugas",
+      "umkm": []
+    },
+    {
+      "kode": "DT.79.0018",
+      "radius_m": 600,
+      "qr": "statis",
+      "jalur": "petugas",
+      "alasan": "DPP 2, DTW buatan berloket; mode petugas",
+      "umkm": []
+    },
+    {
+      "kode": "DT.79.0019",
+      "radius_m": 600,
+      "qr": "statis",
+      "jalur": "petugas",
+      "alasan": "DPP 2, DTW buatan berloket; mode petugas",
+      "umkm": []
+    }
   ]
 }

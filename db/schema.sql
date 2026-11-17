@@ -48,3 +48,68 @@ CREATE TABLE IF NOT EXISTS permintaan_subjek (
   jenis     TEXT NOT NULL,             -- hapus
   jumlah    INT NOT NULL               -- baris yang dianonimkan
 );
+
+-- ======================= Pencatatan dari sisi DTW =======================
+
+-- Akun petugas DTW, verifikator kab/kota, dan admin provinsi (selain ADMIN_EMAILS di environment).
+CREATE TABLE IF NOT EXISTS pengguna (
+  id          BIGSERIAL PRIMARY KEY,
+  email       TEXT NOT NULL,
+  peran       TEXT NOT NULL CHECK (peran IN ('admin','verifikator','petugas')),
+  kab         TEXT,                 -- verifikator: nama kab/kota seperti di data DTW, mis. "Kota Batu"
+  dtw_kode    TEXT,                 -- petugas: DTW yang dicatat
+  nama        TEXT,
+  dibuat_oleh TEXT,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE UNIQUE INDEX IF NOT EXISTS pengguna_uniq ON pengguna (lower(email), peran, coalesce(kab, ''), coalesce(dtw_kode, ''));
+
+-- Ketukan tombol hitung petugas (+1 wisnus, +1 wisman, +rombongan). Bantu mengisi rekap harian.
+CREATE TABLE IF NOT EXISTS hitung_petugas (
+  id         BIGSERIAL PRIMARY KEY,
+  client_id  TEXT UNIQUE,            -- id dari perangkat, mencegah ganda saat kirim ulang offline
+  dtw_kode   TEXT NOT NULL,
+  waktu      TIMESTAMPTZ NOT NULL,
+  tanggal    DATE NOT NULL,
+  wisnus     INT NOT NULL DEFAULT 0, -- boleh negatif (tombol batal)
+  wisman     INT NOT NULL DEFAULT 0,
+  petugas    TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS hitung_dtw_idx ON hitung_petugas (dtw_kode, tanggal);
+
+-- Angka resmi harian per DTW. Sumber: petugas (rekap harian), scan (dari check-in QR), online (TNBTS dll).
+CREATE TABLE IF NOT EXISTS rekap_harian (
+  dtw_kode           TEXT NOT NULL,
+  tanggal            DATE NOT NULL,
+  wisnus             INT NOT NULL DEFAULT 0 CHECK (wisnus >= 0),
+  wisman             INT NOT NULL DEFAULT 0 CHECK (wisman >= 0),
+  sumber             TEXT NOT NULL CHECK (sumber IN ('petugas','scan','online')),
+  catatan            TEXT,
+  diisi_oleh         TEXT,
+  diisi_at           TIMESTAMPTZ,
+  status             TEXT NOT NULL DEFAULT 'diajukan' CHECK (status IN ('diajukan','terverifikasi','ditolak')),
+  diverifikasi_oleh  TEXT,
+  diverifikasi_at    TIMESTAMPTZ,
+  catatan_verifikasi TEXT,
+  PRIMARY KEY (dtw_kode, tanggal)
+);
+
+-- Periode libur: verifikasi kab/kota wajib harian (di luar periode ini: mingguan).
+CREATE TABLE IF NOT EXISTS periode_libur (
+  id          BIGSERIAL PRIMARY KEY,
+  nama        TEXT NOT NULL,
+  mulai       DATE NOT NULL,
+  selesai     DATE NOT NULL,
+  dibuat_oleh TEXT
+);
+
+-- Jejak aktivitas petugas/verifikator/admin (akuntabilitas data).
+CREATE TABLE IF NOT EXISTS log_aktivitas (
+  id       BIGSERIAL PRIMARY KEY,
+  at       TIMESTAMPTZ NOT NULL DEFAULT now(),
+  email    TEXT,
+  aksi     TEXT NOT NULL,
+  dtw_kode TEXT,
+  detail   TEXT
+);
