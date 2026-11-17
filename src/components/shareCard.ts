@@ -17,11 +17,14 @@ export async function makeShareCard(opts: { title: string; nama: string; kab: st
   g.fillStyle = "#cfe9eb"; g.font = "600 44px 'Plus Jakarta Sans', sans-serif"; g.fillText(`${opts.kab}, Jawa Timur`, 80, 430 + lines.length * 104);
   if (opts.stampSvg) {
     const svg = opts.stampSvg.cloneNode(true) as SVGSVGElement;
-    svg.setAttribute("width", "520"); svg.setAttribute("height", "520"); svg.style.color = "#ffffff";
+    svg.setAttribute("width", "500"); svg.setAttribute("height", "500");
     svg.querySelectorAll("text").forEach((t) => t.setAttribute("font-family", "Plus Jakarta Sans, sans-serif"));
-    const url = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(new XMLSerializer().serializeToString(svg).replace(/currentColor/g, "#ffffff"));
+    const url = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(new XMLSerializer().serializeToString(svg));
     const img = new Image(); img.src = url; await img.decode().catch(() => {});
-    g.globalAlpha = 0.95; g.drawImage(img, W - 600, H - 640, 520, 520); g.globalAlpha = 1;
+    // Stempel dicap di atas "kertas" krem agar warna tinta kategori tetap terbaca.
+    g.save(); g.translate(W - 300, H - 330); g.rotate(-0.05);
+    g.fillStyle = "#f7f1e3"; g.beginPath(); g.arc(0, 0, 240, 0, Math.PI * 2); g.fill();
+    g.drawImage(img, -215, -215, 430, 430); g.restore();
   }
   g.fillStyle = "#ffffff"; g.font = "600 36px 'Plus Jakarta Sans', sans-serif"; g.fillText(opts.tanggal, 80, H - 120);
   g.fillStyle = "#cfe9eb"; g.font = "500 32px 'Plus Jakarta Sans', sans-serif"; g.fillText("#PasporWisataJatim", 80, H - 70);
